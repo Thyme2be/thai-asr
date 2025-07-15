@@ -1,0 +1,32 @@
+# Python Backend (FastAPI)
+fastapi-backend/__pycache__/
+fastapi-backend/.env
+fastapi-backend/venv/
+fastapi-backend/.venv/
+
+# Next.js Frontend
+next-frontend/.next/
+next-frontend/node_modules/
+next-frontend/.env*
+next-frontend/npm-debug.log*
+next-frontend/yarn-debug.log*
+next-frontend/yarn-error.log*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Other common ignores
+*.swp
+*.bak
+*.swo
+*.tmp
