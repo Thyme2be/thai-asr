@@ -1,6 +1,6 @@
 # Python Backend (FastAPI)
-fastapi-backend/__pycache__/
-fastapi-backend/.env
+__pycache__/
+fastapi-backend/.env*
 fastapi-backend/venv/
 fastapi-backend/.venv/
 
@@ -30,3 +30,9 @@ Thumbs.db
 *.bak
 *.swo
 *.tmp
+
+# AI-models
+fastapi-backend/app/ai-models
+
+# Audio testing
+fastapi-backend/app/audio

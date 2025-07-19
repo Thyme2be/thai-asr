@@ -1,12 +1,9 @@
-"use client";
-
-import DynamicCard from "@/components/DynamicCard";
+import DynamicPage from "@/components/DynamicPage";
 
 export default function page() {
-
   return (
     <>
-      <DynamicCard cardType="long-form" />
+      <DynamicPage cardType="long-form" />
     </>
   );
 }

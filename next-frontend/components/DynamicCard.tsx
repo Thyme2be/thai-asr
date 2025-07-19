@@ -1,35 +1,80 @@
 "use client";
 
+import { DynamicCardProps } from "@/types/props";
 import { useRef, useState } from "react";
-import SoundWaveIcon from "./icons/SoundWaveIcon";
-import UploadIcon from "./icons/UploadIcon";
-import Microphone from "./icons/Microphone";
+import {
+  Microphone,
+  SoundWaveIcon,
+  UploadIcon,
+} from "@/components/icons/icons-index";
 
-const DynamicCard = ({ cardType }: { cardType: string }) => {
+const TEXT = {
+  uploadTitle: "Upload Thai Audio File",
+  micTitle: "Talk to your microphone",
+  noFile: "No file selected",
+  fileTypeError: "FILE TYPE ERROR: Please upload ONLY .wav audio file!",
+};
+
+const DynamicCard = ({ cardType, transcribeText }: DynamicCardProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isLongForm = cardType === "long-form";
 
-  const handleFileUpload = () => {
-    fileInputRef.current?.click();
+  const isValidAudio = (file: File) => {
+    return (
+      file.type === "audio/wav" || file.name.toLowerCase().endsWith(".wav")
+    );
   };
+
+  const handleFileUpload = () => fileInputRef.current?.click();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && !file.type.startsWith("audio/")) {
-      setErrorMessage("FILE TYPE ERROR: Please upload ONLY AUDIO file!");
-      setSelectedFile(null);
-      return;
+    if (file && !isValidAudio(file)) {
+      setErrorMessage(TEXT.fileTypeError);
+      return setSelectedFile(null);
     }
     setErrorMessage(null);
     setSelectedFile(file || null);
   };
+
+  const handleTranscribe = async () => {
+    const formData = new FormData();
+    if (selectedFile) {
+      formData.append("file", selectedFile);
+    } else {
+      console.error(
+        "ERROR FILE NOT FOUND: There are no .wav file to transcribe"
+      );
+    }
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/file-asr/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error("Error POST to back end server", error)
+      }
+
+      const data = await response.json();
+      transcribeText(data.transcribe)
+    } catch (error) {
+      console.error("Error sending file to backend", error);
+    }
+  };
+
   return (
     <section className=" flex justify-center p-10 ">
       <div className=" flex flex-col items-center place-content-between p-5 h-[55vh] card ">
         <h1 className=" text-4xl text-blue-700 font-bold">
-          {isLongForm ? "Upload Thai Audio File" : "Talk to your microphone"}
+          {isLongForm ? TEXT.uploadTitle : TEXT.micTitle}
         </h1>
 
         {/* Display Uploaded file or Error */}
@@ -41,11 +86,12 @@ const DynamicCard = ({ cardType }: { cardType: string }) => {
             <p className=" text-2xl font-bold ">{`${selectedFile.name}`}</p>
           </div>
         )}
+
         {isLongForm && !selectedFile && <p>No file selected</p>}
         <input
           id="audio-upload"
           type="file"
-          accept="audio/*"
+          accept=".wav, audio/wav"
           ref={fileInputRef}
           onChange={handleFileChange}
           className=" hidden "
@@ -63,8 +109,13 @@ const DynamicCard = ({ cardType }: { cardType: string }) => {
                 <UploadIcon />
               </div>
             </button>
+
+            {/* Transcrib Button */}
             {selectedFile && (
-              <button className=" flex justify-center items-center text-white text-xl mt-2 bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700 cursor-pointer shadow-lg rounded-3xl p-2 ">
+              <button
+                onClick={handleTranscribe}
+                className=" flex justify-center items-center text-white text-xl mt-2 bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700 cursor-pointer shadow-lg rounded-3xl p-2 "
+              >
                 Transcribe
               </button>
             )}

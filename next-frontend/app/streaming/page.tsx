@@ -1,8 +1,11 @@
-import DynamicCard from "@/components/DynamicCard";
-import React from "react";
+import DynamicPage from "@/components/DynamicPage";
 
 const page = () => {
-  return <DynamicCard cardType="streaming" />;
+  return (
+    <>
+      <DynamicPage cardType="streaming" />
+    </>
+  );
 };
 
 export default page;
