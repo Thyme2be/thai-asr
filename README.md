@@ -76,85 +76,84 @@ This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-back
 
 ## 💡 What AI Suggests
 
-```{admonition} Click here!
-:class: tip dropdown
-```python
-import nemo.collections.asr as nemo_asr
-import shutil
-import tempfile
-import os
-from fastapi import UploadFile
-
-try:
-    asr_model = nemo_asr.models.EncDecCTCModelBPE.restore_from(
-        "app/ai-models/stt_th_fastconformer_ctc_large_nacc_data.nemo"
-    )
-except Exception as e:
-    print("Error occurred during loading AI model", e)
-
-
-async def transcribe_audio_file(file: UploadFile):
-    temp_path = None
-    transcribed_text = ""
+<details>
+    ```python
+    import nemo.collections.asr as nemo_asr
+    import shutil
+    import tempfile
+    import os
+    from fastapi import UploadFile
 
     try:
-        with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
-            await file.seek(0)
-            shutil.copyfileobj(file.file, tmp)
-            temp_path = tmp.name
+        asr_model = nemo_asr.models.EncDecCTCModelBPE.restore_from(
+            "app/ai-models/stt_th_fastconformer_ctc_large_nacc_data.nemo"
+        )
+    except Exception as e:
+        print("Error occurred during loading AI model", e)
+
+
+    async def transcribe_audio_file(file: UploadFile):
+        temp_path = None
+        transcribed_text = ""
 
         try:
-            output = asr_model.transcribe([temp_path])
+            with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
+                await file.seek(0)
+                shutil.copyfileobj(file.file, tmp)
+                temp_path = tmp.name
 
-            if output and len(output) > 0:
-                transcribed_text = output[0]
-            else:
-                print("Transcription returned empty output.")
+            try:
+                output = asr_model.transcribe([temp_path])
+
+                if output and len(output) > 0:
+                    transcribed_text = output[0]
+                else:
+                    print("Transcription returned empty output.")
+
+            except Exception as e:
+                print(f"Error while transcription sound: {e}")
 
         except Exception as e:
-            print(f"Error while transcription sound: {e}")
+            print(f"Error during file processing (creating temp file or copying): {e}")
 
-    except Exception as e:
-        print(f"Error during file processing (creating temp file or copying): {e}")
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except OSError as e:
+                    print(f"Error removing temporary file {temp_path}: {e}")
+            if file.file:
+                await file.close()
 
-    finally:
-        if temp_path and os.path.exists(temp_path):
-            try:
-                os.remove(temp_path)
-            except OSError as e:
-                print(f"Error removing temporary file {temp_path}: {e}")
-        if file.file:
-            await file.close()
-
-    print(transcribed_text)
-    return transcribed_text
-```
+        print(transcribed_text)
+        return transcribed_text
+    ```
+</details>
 
 ## 🚨 What Actually Resolves with `async`
-
-```{admonition} Click here!
-:class: danger dropdown
-```python
-async def transcribe_audio_file(file: UploadFile):
-    try:
-        with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
-            shutil.copyfileobj(file.file, tmp)
-            temp_path = tmp.name
-
+<details>
+    ```python
+    async def transcribe_audio_file(file: UploadFile):
         try:
-            output = asr_model.transcribe([temp_path])
+            with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
+                shutil.copyfileobj(file.file, tmp)
+                temp_path = tmp.name
+
+            try:
+                output = asr_model.transcribe([temp_path])
+
+            except Exception as e:
+                print("Error while transcription sound", e)
 
         except Exception as e:
-            print("Error while transcription sound", e)
+            print("Error while convert sound file", e)
 
-    except Exception as e:
-        print("Error while convert sound file", e)
+        finally:
+            os.remove(temp_path)
 
-    finally:
-        os.remove(temp_path)
-
-    return output[0].text
-```
+        return output[0].text
+    ```
+</details>
 
 # Silero-vad (For Voice Activity Detection) Materials:
 Github Official: https://github.com/snakers4/silero-vad
@@ -162,6 +161,7 @@ Github Colab Example: https://github.com/snakers4/silero-vad/blob/master/silero-
 
 For Straming use `class VADIterator`
 Github: https://github.com/snakers4/silero-vad/blob/94811cbe1207ec24bc0f5370b895364b8934936f/src/silero_vad/utils_vad.py#L398
+
 # Tips:
 1. `SAMPLING_RATE` means analog signal to store and process sound by convert into digital signal. It's measured in Hz or kHz. Typically in nowaday headphone has 48 kHz or 44,100 kHz which is 48,000 or 44,100 samples taken per seconds.
  - Higher `SAMPLING_RATE` means more sound's detail and accurate
