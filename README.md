@@ -70,13 +70,15 @@ Error occured when Pytorch version when installing with **Nemo Framework** docum
 
 # **Bug Faced**
 
-1. If `outer function` is `async` and `await` for `inner function`, `inner function` have to use `async` eventhough there is no `await` use in `inner function`
+1. If the `outer function` is `async` and it `await`s the `inner function`, the `inner function` must also be `async` even if it doesn’t use `await`.
 
-Happend in `fastapi-backend/services/file_transcriber.py` and `fastapi-backend/routers/fast_asr.py` 
+This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-backend/routers/fast_asr.py`.
 
-- What AI Suggest:
+## 💡 What AI Suggests
+
 ```{admonition} Click here!
-:class: tip, dropdown
+:class: tip dropdown
+```python
 import nemo.collections.asr as nemo_asr
 import shutil
 import tempfile
@@ -128,12 +130,12 @@ async def transcribe_audio_file(file: UploadFile):
     return transcribed_text
 ```
 
-- What actually resolve by `async`:
+## 🚨 What Actually Resolves with `async`
 
 ```{admonition} Click here!
-:class: danger, dropdown
+:class: danger dropdown
+```python
 async def transcribe_audio_file(file: UploadFile):
-
     try:
         with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
             shutil.copyfileobj(file.file, tmp)
