@@ -9,6 +9,7 @@ try:
     asr_model = nemo_asr.models.EncDecCTCModelBPE.restore_from(
         "app/ai-models/stt_th_fastconformer_ctc_large_nacc_data.nemo"
     )
+    asr_model.eval() # More consistent result since neuron are active for evaluation mode
 except Exception as e:
     print("Error occurred during loading AI model", e)
 
