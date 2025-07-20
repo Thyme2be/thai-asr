@@ -57,7 +57,7 @@ Once file get validate and pass into back end when user clicked `transcribe` but
 - 16000 Hz Mono-channel
 **If the sound file isn't <u>16kHz</u> with <u>Mono-channel</u>. You have to convert it before use `.transcribe()`**
 
-# Structure
+# **Structure**
 1. In front end page, we created only one single page with dynamic component. So both feature `Long Form` and `Streaming` will have shared states and mostly use the same components.
 
 # **Possiblity Error**
@@ -70,12 +70,13 @@ Error occured when Pytorch version when installing with **Nemo Framework** docum
 
 # **Bug Faced**
 
-## If `outer function` is `async` and `await` for `inner function`, `inner function` have to use `async` eventhough there is no `await` use in `inner function`
+1. If `outer function` is `async` and `await` for `inner function`, `inner function` have to use `async` eventhough there is no `await` use in `inner function`
 
 Happend in `fastapi-backend/services/file_transcriber.py` and `fastapi-backend/routers/fast_asr.py` 
 
 - What AI Suggest:
-```{toggle}
+```{admonition} Click here!
+:class: tip, dropdown
 import nemo.collections.asr as nemo_asr
 import shutil
 import tempfile
@@ -129,7 +130,8 @@ async def transcribe_audio_file(file: UploadFile):
 
 - What actually resolve by `async`:
 
-```{toggle}
+```{admonition} Click here!
+:class: danger, dropdown
 async def transcribe_audio_file(file: UploadFile):
 
     try:
@@ -153,25 +155,25 @@ async def transcribe_audio_file(file: UploadFile):
 ```
 
 # Silero-vad (For Voice Activity Detection) Materials:
-Github Official: `https://github.com/snakers4/silero-vad`
-Github Colab Example: `https://github.com/snakers4/silero-vad/blob/master/silero-vad.ipynb`
+Github Official: https://github.com/snakers4/silero-vad
+Github Colab Example: https://github.com/snakers4/silero-vad/blob/master/silero-vad.ipynb
 
 For Straming use `class VADIterator`
-Github: `https://github.com/snakers4/silero-vad/blob/94811cbe1207ec24bc0f5370b895364b8934936f/src/silero_vad/utils_vad.py#L398`
-## Tip:
+Github: https://github.com/snakers4/silero-vad/blob/94811cbe1207ec24bc0f5370b895364b8934936f/src/silero_vad/utils_vad.py#L398
+# Tips:
 1. `SAMPLING_RATE` means analog signal to store and process sound by convert into digital signal. It's measured in Hz or kHz. Typically in nowaday headphone has 48 kHz or 44,100 kHz which is 48,000 or 44,100 samples taken per seconds.
  - Higher `SAMPLING_RATE` means more sound's detail and accurate
 
 2. There is no need to be `file_path` for `.transcribe()`. You can use `numpy_arrays` which from `.wav` to transcribe the sound. BUT, you have to follow these steps:
-Github use `soundfile`: `https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/results.html#transcribing-inference` 
+Github use `soundfile`: https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/results.html#transcribing-inference
 ![alt text](image.png)
 
 3. Use `.transcribe_generator(list(.wav tensor_audio), config))` instead of `.transcribe()`
 Why?: Can handle multi-segments instead of looping into each one
 
 4. When transcribe multi-samples simultaneously, config model's strategy from `greedy` (default) to `greedy_batch` will get better performance
-# Greedy vs. Greedy Batch Decoding in ASR
 
+## Greedy vs. Greedy Batch Decoding in ASR
 | Feature              | `greedy`                            | `greedy_batch`                         |
 |---------------------|--------------------------------------|----------------------------------------|
 | 🧠 Decoding Method   | Processes one sample at a time       | Processes multiple samples in parallel |
@@ -191,4 +193,11 @@ decoding_cfg = asr_model.cfg.decoding
 print(decoding_cfg)
 ```
 - If you want to change config (ex. strategy)
-`decoding_cfg.strategy = "greedy_batch"`
+```
+decoding_cfg.strategy = "greedy_batch" # change the "strategy" to other thing you want to change
+asr_model.change_decoding_strategy(decoding_cfg) # make config change in model
+```
+or you can use
+```
+asr_model.change_decoding_strategy(decoding_cfg={"strategy": "greedy_batch"})
+```
