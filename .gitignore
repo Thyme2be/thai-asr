@@ -36,3 +36,6 @@ fastapi-backend/app/ai-models
 
 # Audio testing
 fastapi-backend/app/audio
+
+# Test (Experiment) folder and files
+fastapi-backend/app/services/test

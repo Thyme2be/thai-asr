@@ -159,9 +159,36 @@ Github Colab Example: `https://github.com/snakers4/silero-vad/blob/master/silero
 For Straming use `class VADIterator`
 Github: `https://github.com/snakers4/silero-vad/blob/94811cbe1207ec24bc0f5370b895364b8934936f/src/silero_vad/utils_vad.py#L398`
 ## Tip:
-- `SAMPLING_RATE` means analog signal to store and process sound by convert into digital signal. It's measured in Hz or kHz. Typically in nowaday headphone has 48 kHz or 44,100 kHz which is 48,000 or 44,100 samples taken per seconds.
+1. `SAMPLING_RATE` means analog signal to store and process sound by convert into digital signal. It's measured in Hz or kHz. Typically in nowaday headphone has 48 kHz or 44,100 kHz which is 48,000 or 44,100 samples taken per seconds.
  - Higher `SAMPLING_RATE` means more sound's detail and accurate
 
-- There is no need to be `file_path` for `.transcribe()`. You can use `numpy_arrays` which from `.wav` to transcribe the sound. BUT, you have to follow these steps:
+2. There is no need to be `file_path` for `.transcribe()`. You can use `numpy_arrays` which from `.wav` to transcribe the sound. BUT, you have to follow these steps:
 Github use `soundfile`: `https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/results.html#transcribing-inference` 
 ![alt text](image.png)
+
+3. Use `.transcribe_generator(list(.wav tensor_audio), config))` instead of `.transcribe()`
+Why?: Can handle multi-segments instead of looping into each one
+
+4. When transcribe multi-samples simultaneously, config model's strategy from `greedy` (default) to `greedy_batch` will get better performance
+# Greedy vs. Greedy Batch Decoding in ASR
+
+| Feature              | `greedy`                            | `greedy_batch`                         |
+|---------------------|--------------------------------------|----------------------------------------|
+| 🧠 Decoding Method   | Processes one sample at a time       | Processes multiple samples in parallel |
+| 🔄 Efficiency        | Lower — suitable for debugging/testing | Higher — better for inference speed     |
+| 📦 Batch Support     | No                                   | Yes                                    |
+| 🪄 Implementation    | Simpler logic                        | Requires optimized batching mechanisms |
+| 📊 Use Case          | Step-by-step analysis, prototyping   | Production-level transcription          |
+| 🎯 Output Shape      | Output per individual input          | Batched output matching input batch     |
+| 🛠 Compatibility     | Any input shape                      | Requires consistent input lengths or padding |
+
+More: https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/configs.html#transducer-decoding
+
+5. To change ASR model config
+- Check what can be setting using 
+```
+decoding_cfg = asr_model.cfg.decoding
+print(decoding_cfg)
+```
+- If you want to change config (ex. strategy)
+`decoding_cfg.strategy = "greedy_batch"`
