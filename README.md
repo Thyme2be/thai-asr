@@ -78,80 +78,82 @@ This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-back
 
 <details>
     ```
-        import nemo.collections.asr as nemo_asr
-        import shutil
-        import tempfile
-        import os
-        from fastapi import UploadFile
+    
+    import nemo.collections.asr as nemo_asr
+    import shutil
+    import tempfile
+    import os
+    from fastapi import UploadFile
+
+    try:
+        asr_model = nemo_asr.models.EncDecCTCModelBPE.restore_from(
+            "app/ai-models/stt_th_fastconformer_ctc_large_nacc_data.nemo"
+        )
+    except Exception as e:
+        print("Error occurred during loading AI model", e)
+
+
+    async def transcribe_audio_file(file: UploadFile):
+        temp_path = None
+        transcribed_text = ""
 
         try:
-            asr_model = nemo_asr.models.EncDecCTCModelBPE.restore_from(
-                "app/ai-models/stt_th_fastconformer_ctc_large_nacc_data.nemo"
-            )
-        except Exception as e:
-            print("Error occurred during loading AI model", e)
-
-
-        async def transcribe_audio_file(file: UploadFile):
-            temp_path = None
-            transcribed_text = ""
+            with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
+                await file.seek(0)
+                shutil.copyfileobj(file.file, tmp)
+                temp_path = tmp.name
 
             try:
-                with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
-                    await file.seek(0)
-                    shutil.copyfileobj(file.file, tmp)
-                    temp_path = tmp.name
+                output = asr_model.transcribe([temp_path])
 
-                try:
-                    output = asr_model.transcribe([temp_path])
-
-                    if output and len(output) > 0:
-                        transcribed_text = output[0]
-                    else:
-                        print("Transcription returned empty output.")
-
-                except Exception as e:
-                    print(f"Error while transcription sound: {e}")
+                if output and len(output) > 0:
+                    transcribed_text = output[0]
+                else:
+                    print("Transcription returned empty output.")
 
             except Exception as e:
-                print(f"Error during file processing (creating temp file or copying): {e}")
+                print(f"Error while transcription sound: {e}")
 
-            finally:
-                if temp_path and os.path.exists(temp_path):
-                    try:
-                        os.remove(temp_path)
-                    except OSError as e:
-                        print(f"Error removing temporary file {temp_path}: {e}")
-                if file.file:
-                    await file.close()
+        except Exception as e:
+            print(f"Error during file processing (creating temp file or copying): {e}")
 
-            print(transcribed_text)
-            return transcribed_text
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except OSError as e:
+                    print(f"Error removing temporary file {temp_path}: {e}")
+            if file.file:
+                await file.close()
+
+        print(transcribed_text)
+        return transcribed_text
     ```
 </details>
 
 ## 🚨 What Actually Resolves with `async`
 <details>
     ```
-        async def transcribe_audio_file(file: UploadFile):
+
+    async def transcribe_audio_file(file: UploadFile):
+        try:
+            with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
+                shutil.copyfileobj(file.file, tmp)
+                temp_path = tmp.name
+
             try:
-                with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
-                    shutil.copyfileobj(file.file, tmp)
-                    temp_path = tmp.name
-
-                try:
-                    output = asr_model.transcribe([temp_path])
-
-                except Exception as e:
-                    print("Error while transcription sound", e)
+                output = asr_model.transcribe([temp_path])
 
             except Exception as e:
-                print("Error while convert sound file", e)
+                print("Error while transcription sound", e)
 
-            finally:
-                os.remove(temp_path)
+        except Exception as e:
+            print("Error while convert sound file", e)
 
-            return output[0].text
+        finally:
+            os.remove(temp_path)
+
+        return output[0].text
     ```
 </details>
 
