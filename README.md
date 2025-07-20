@@ -77,6 +77,7 @@ This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-back
 ## 💡 What AI Suggests
 
 <details>
+
     import nemo.collections.asr as nemo_asr
     import shutil
     import tempfile
@@ -130,6 +131,7 @@ This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-back
 
 ## 🚨 What Actually Resolves with `async`
 <details>
+
     async def transcribe_audio_file(file: UploadFile):
         try:
             with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
