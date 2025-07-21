@@ -1,3 +1,4 @@
+import pprint
 import nemo.collections.asr as nemo_asr
 import shutil
 import tempfile
@@ -50,7 +51,7 @@ except Exception as e:
 
 
 # Async if need
-async def transcribe_audio_file(file: UploadFile):
+def transcribe_audio_file(file: UploadFile):
 
     try:
         
@@ -68,7 +69,7 @@ async def transcribe_audio_file(file: UploadFile):
             speech_timestamps = get_speech_timestamps(
                 wav, vad_model
             )  # Default sampling_rate = 16kHz
-
+            
             try:
 
                 # Gather all tensor audio file chunk before transcribe once
@@ -86,19 +87,22 @@ async def transcribe_audio_file(file: UploadFile):
                     )  # Convert sample unit to second unit then formatted into hh:mm:ss
                     for segment in speech_timestamps
                 ]
-
+                
+                # TODO: FIX Code bug
                 # Return as generator object in memory, need convert to list for readability
-                transcripts = list(
-                    asr_model.transcribe_generator(segment_tensors, config)
-                )[0] # [[content]][0] -> [content]
+                # transcripts = list(asr_model.transcribe_generator([segment_tensors[0]], config))[0]
+                # pprint.pp(transcripts)
+                # [[content]][0] -> [content]
+                
+                # print("CODE IS ALREADY TRANSCRIPTED")
+                
+                # # Result formatted before sent to front endd
+                # transcribed_output = [
+                #     f"{timestamp}: {transcript.text}"
+                #     for timestamp, transcript in zip(formatted_timestamps, transcripts)
+                # ]
 
-                # Result formatted before sent to front endd
-                transcribed_output = [
-                    f"{timestamp}: {transcript.text}"
-                    for timestamp, transcript in zip(formatted_timestamps, transcripts)
-                ]
-
-                return {"text": "\n".join(transcribed_output)}
+                # return {"text": "\n".join(transcribed_output)}
 
             except Exception as e:
                 print("ASR Transcribe Error", e)

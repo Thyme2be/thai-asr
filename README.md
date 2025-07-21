@@ -84,11 +84,13 @@ Error occured when Pytorch version when installing with **Nemo Framework** docum
 
 > Upgrade to `pytorch=2.7.1` to resolve the error
 
-# **Bug Faced**
+# **Bug Report**
 
 1. If the `outer function` is `async` and it `await`s the `inner function`, the `inner function` must also be `async` even if it doesn’t use `await`.
 
 This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-backend/routers/fast_asr.py`.
+
+2. Error WSL down when .transcribe_generator() in `file_transcriber.py`
 
 ## 💡 What AI Suggests
 
