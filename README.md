@@ -37,6 +37,10 @@
 
 ## Start Website
 
+**USE THIS COMMAND: `. run.sh`** (Make sure you're in root folder)
+
+OR
+
 1. For front end:
    1.1 Access into next-frontend directory
    using `cd next-frontend`
@@ -90,7 +94,14 @@ Error occured when Pytorch version when installing with **Nemo Framework** docum
 
 This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-backend/routers/fast_asr.py`.
 
-2. Error WSL down when .transcribe_generator() in `file_transcriber.py`
+2. Error WSL down when `.transcribe_generator()` in `file_transcriber.py`
+Bug resolved!: DO NOT use `config.batch_size = ` command
+
+3. when use `.transcribe_generator()` it output not full context in voice
+Bug resolved!: 
+Bad code `transcripts_result = list(asr_model.transcribe_generator(segment_tensors, config))[0]`
+Fix code `transcripts_result = list(asr_model.transcribe_generator(segment_tensors, config))` Remove `[0]`
+Since we use `batch_size = 4` (default), it will create list with every 4 audio chunk transcribed  
 
 ## 💡 What AI Suggests
 

@@ -6,10 +6,6 @@ import os
 from fastapi import UploadFile
 from silero_vad import load_silero_vad, read_audio, get_speech_timestamps
 
-# Higher BATCH_SIZE will consume more computer resource, but faster process
-BATCH_SIZE = 32
-
-
 def formattedTime(seconds):
     hrs = seconds // 3600
     mins = (seconds % 3600) // 60
@@ -35,9 +31,7 @@ try:
 
     # Config for .transcribe_generator()
     config = asr_model.get_transcribe_config()
-    config.batch_size = (
-        BATCH_SIZE  # Higher will process faster, but consume more computer resource
-    )
+    # config.batch_size = 4
 
     # Config ASR Transducer Decoding
     decoding_cfg = asr_model.cfg.decoding
@@ -90,19 +84,20 @@ def transcribe_audio_file(file: UploadFile):
                 
                 # TODO: FIX Code bug
                 # Return as generator object in memory, need convert to list for readability
-                # transcripts = list(asr_model.transcribe_generator([segment_tensors[0]], config))[0]
-                # pprint.pp(transcripts)
-                # [[content]][0] -> [content]
+                transcripts = list(asr_model.transcribe_generator(segment_tensors, config))
+                transcripts_result = [chunk.text 
+                                      for ecahTranscribe in transcripts 
+                                      for chunk in ecahTranscribe]
                 
-                # print("CODE IS ALREADY TRANSCRIPTED")
+                # Result formatted before sent to front endd
+                transcribed_output = [
+                    f"{timestamp}: {transcript}"
+                    for timestamp, transcript in zip(formatted_timestamps, transcripts_result)
+                ]
                 
-                # # Result formatted before sent to front endd
-                # transcribed_output = [
-                #     f"{timestamp}: {transcript.text}"
-                #     for timestamp, transcript in zip(formatted_timestamps, transcripts)
-                # ]
+                pprint.pp(transcribed_output)
 
-                # return {"text": "\n".join(transcribed_output)}
+                return {"text": "\n".join(transcribed_output)}
 
             except Exception as e:
                 print("ASR Transcribe Error", e)

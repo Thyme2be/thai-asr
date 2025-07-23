@@ -64,8 +64,7 @@ const DynamicCard = ({ cardType, transcribeText }: DynamicCardProps) => {
       }
 
       const data = await response.json();
-      console.log(data)
-      // transcribeText(data.transcribe)
+      transcribeText(data.text)
     } catch (error) {
       console.error("Error sending file to backend", error);
     }
