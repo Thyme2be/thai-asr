@@ -35,7 +35,7 @@ try:
 
     # Config ASR Transducer Decoding
     decoding_cfg = asr_model.cfg.decoding
-    decoding_cfg.strategy = "greedy_batch"
+    decoding_cfg.strategy = "greedy_batch" # greedy
     asr_model.change_decoding_strategy(
         decoding_cfg
     )  # asr_model.change_decoding_strategy(decoding_cfg={"strategy": "greedy_batch"})

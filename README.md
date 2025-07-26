@@ -90,7 +90,7 @@ Error occured when Pytorch version when installing with **Nemo Framework** docum
 
 # **Bug Report**
 
-1. If the `outer function` is `async` and it `await`s the `inner function`, the `inner function` must also be `async` even if it doesn’t use `await`.
+<!-- 1. If the `outer function` is `async` and it `await`s the `inner function`, the `inner function` must also be `async` even if it doesn’t use `await`. -->
 
 This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-backend/routers/fast_asr.py`.
 
@@ -243,3 +243,10 @@ or you can use
 ```
 asr_model.change_decoding_strategy(decoding_cfg={"strategy": "greedy_batch"})
 ```
+
+# Using Riva for streaming
+Use Local docker is better for 
+- single laptop, 
+- lower overhead, 
+- great for devlopment/testing 
+- mostly use with single laptop.

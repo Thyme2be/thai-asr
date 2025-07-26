@@ -37,5 +37,9 @@ fastapi-backend/app/ai-models
 # Audio testing
 fastapi-backend/app/audio
 
+# Riva cache and setup outputs
+fastapi-backend/riva_quickstart_v2.19.0/*.sh
+fastapi-backend/riva_quickstart_v2.19.0/*.whl
+
 # Test (Experiment) folder and files
 fastapi-backend/app/services/test
