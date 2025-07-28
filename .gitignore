@@ -33,12 +33,12 @@ Thumbs.db
 
 # AI-models
 fastapi-backend/app/ai-models
+fastapi-backend/riva_quickstart_v2.19.0/converted_models
 
 # Audio testing
 fastapi-backend/app/audio
 
 # Riva cache and setup outputs
-fastapi-backend/riva_quickstart_v2.19.0/*.sh
 fastapi-backend/riva_quickstart_v2.19.0/*.whl
 
 # Test (Experiment) folder and files

@@ -90,100 +90,18 @@ Error occured when Pytorch version when installing with **Nemo Framework** docum
 
 # **Bug Report**
 
-<!-- 1. If the `outer function` is `async` and it `await`s the `inner function`, the `inner function` must also be `async` even if it doesn’t use `await`. -->
-
-This happens in `fastapi-backend/services/file_transcriber.py` and `fastapi-backend/routers/fast_asr.py`.
-
-2. Error WSL down when `.transcribe_generator()` in `file_transcriber.py`
+## Error WSL down when `.transcribe_generator()` in `file_transcriber.py`
 Bug resolved!: DO NOT use `config.batch_size = ` command
 
-3. when use `.transcribe_generator()` it output not full context in voice
+## when use `.transcribe_generator()` it output not full context in voice
 Bug resolved!: 
 Bad code `transcripts_result = list(asr_model.transcribe_generator(segment_tensors, config))[0]`
 Fix code `transcripts_result = list(asr_model.transcribe_generator(segment_tensors, config))` Remove `[0]`
-Since we use `batch_size = 4` (default), it will create list with every 4 audio chunk transcribed  
+Since we use `batch_size = 4` (default), it will create list with every 4 audio chunk transcribed
 
-## 💡 What AI Suggests
-
-<details>
-
-    import nemo.collections.asr as nemo_asr
-    import shutil
-    import tempfile
-    import os
-    from fastapi import UploadFile
-
-    try:
-        asr_model = nemo_asr.models.EncDecCTCModelBPE.restore_from(
-            "app/ai-models/stt_th_fastconformer_ctc_large_nacc_data.nemo"
-        )
-    except Exception as e:
-        print("Error occurred during loading AI model", e)
-
-
-    async def transcribe_audio_file(file: UploadFile):
-        temp_path = None
-        transcribed_text = ""
-
-        try:
-            with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
-                await file.seek(0)
-                shutil.copyfileobj(file.file, tmp)
-                temp_path = tmp.name
-
-            try:
-                output = asr_model.transcribe([temp_path])
-
-                if output and len(output) > 0:
-                    transcribed_text = output[0]
-                else:
-                    print("Transcription returned empty output.")
-
-            except Exception as e:
-                print(f"Error while transcription sound: {e}")
-
-        except Exception as e:
-            print(f"Error during file processing (creating temp file or copying): {e}")
-
-        finally:
-            if temp_path and os.path.exists(temp_path):
-                try:
-                    os.remove(temp_path)
-                except OSError as e:
-                    print(f"Error removing temporary file {temp_path}: {e}")
-            if file.file:
-                await file.close()
-
-        print(transcribed_text)
-        return transcribed_text
-
-</details>
-
-## 🚨 What Actually Resolves with `async`
-
-<details>
-
-    async def transcribe_audio_file(file: UploadFile):
-        try:
-            with tempfile.NamedTemporaryFile("wb", delete=False, suffix=".wav") as tmp:
-                shutil.copyfileobj(file.file, tmp)
-                temp_path = tmp.name
-
-            try:
-                output = asr_model.transcribe([temp_path])
-
-            except Exception as e:
-                print("Error while transcription sound", e)
-
-        except Exception as e:
-            print("Error while convert sound file", e)
-
-        finally:
-            os.remove(temp_path)
-
-        return output[0].text
-
-</details>
+## Error when run inference the deployed model `.rmir`
+Bug resolved!:
+when building `.rmir` file to `.riva`, use `--ms_per_timestep=80 \` flag to make model match with the sound file
 
 # Silero-vad (For Voice Activity Detection) Materials:
 
