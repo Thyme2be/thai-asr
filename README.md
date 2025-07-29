@@ -94,14 +94,22 @@ Error occured when Pytorch version when installing with **Nemo Framework** docum
 Bug resolved!: DO NOT use `config.batch_size = ` command
 
 ## when use `.transcribe_generator()` it output not full context in voice
-Bug resolved!: 
+Bug resolved!:
+
 Bad code `transcripts_result = list(asr_model.transcribe_generator(segment_tensors, config))[0]`
+
 Fix code `transcripts_result = list(asr_model.transcribe_generator(segment_tensors, config))` Remove `[0]`
+
 Since we use `batch_size = 4` (default), it will create list with every 4 audio chunk transcribed
 
 ## Error when run inference the deployed model `.rmir`
 Bug resolved!:
-when building `.rmir` file to `.riva`, use `--ms_per_timestep=80 \` flag to make model match with the sound file
+Error: `E0728 17:12:02.357453 169 streaming_asr_ensemble.cc:1337] Caught exception: Number of output frames or output tokens do not match expected values. Frames expected 201 got 101. Tokens expected 3001 got 3001`
+Cause: 
+- `Frames expected 201 got 101` -> Frame expected mismatched
+- Model has trained to expect `ms_per_timestep=80` not `40`
+Fix: 
+- when building `.rmir` file to `.riva`, use `--ms_per_timestep=80 \` flag to make model match with the sound file
 
 # Silero-vad (For Voice Activity Detection) Materials:
 
@@ -119,7 +127,6 @@ Github: https://github.com/snakers4/silero-vad/blob/94811cbe1207ec24bc0f5370b895
 
 2. There is no need to be `file_path` for `.transcribe()`. You can use `numpy_arrays` which from `.wav` to transcribe the sound. BUT, you have to follow these steps:
    Github use `soundfile`: https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/results.html#transcribing-inference
-   ![alt text](image.png)
 
 3. Use `.transcribe_generator(list(.wav tensor_audio), config))` instead of `.transcribe()`
    Why?: Can handle multi-segments instead of looping into each one

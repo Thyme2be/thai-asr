@@ -12,6 +12,15 @@ gnome-terminal -- bash -c "
     exec bash
 "
 
+# Launch Riva-server to deploy model
+gnome-terminal -- bash -c "
+    echo 'Opening frontend terminal...';
+    cd ~/projects/thai-asr/fastapi-backend/riva_quickstart_v2.19.0;
+    . riva_start.sh config.sh
+    echo 'Successfully start Riva Server...';
+    exec bash
+"
+
 # Wait a bit to ensure backend terminal opens first
 sleep 10
 
