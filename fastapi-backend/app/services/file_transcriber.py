@@ -1,10 +1,8 @@
 import pprint
-import nemo.collections.asr as nemo_asr
 import shutil
 import tempfile
 import os
 from fastapi import UploadFile
-from silero_vad import load_silero_vad, read_audio, get_speech_timestamps
 import riva.client
 
 
@@ -50,7 +48,7 @@ def transcribe_audio_file(file: UploadFile):
             ]
 
             output = {"text": "\n".join(transcribed_output)}
-            pprint.pp(output)
+            # pprint.pp(output)
             return output
 
         except Exception as e:

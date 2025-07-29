@@ -5,7 +5,6 @@ router = APIRouter()
 
 @router.post('/upload')
 def transcribe_file(file: UploadFile = File(...)):
-    if not file:
-        return "FILE NOT FOUND"
+    print(file)
     transcribed = transcribe_audio_file(file)
     return transcribed
